@@ -20,6 +20,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pressly/goose/v3"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"go.uber.org/zap"
 
 	"company-registry/internal/application/rest"
 	"company-registry/internal/config"
@@ -109,7 +110,7 @@ func setup(ctx context.Context) (*postgres.PostgresContainer, *sqlx.DB, *httptes
 }
 
 func newTestServer(database *sqlx.DB) *httptest.Server {
-	responder := rest.NewResponder()
+	responder := rest.NewResponder(zap.NewNop())
 	authService := service.NewAuthService(
 		persistence.NewUser(database),
 		testSalt,

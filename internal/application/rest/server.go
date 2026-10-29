@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -100,14 +101,25 @@ func (s Server) readRequest(r *http.Request, dest any) error {
 func (s *Server) replyError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, errs.ErrValidation):
-		s.reply.ErrorBadRequest(w, err)
+		s.reply.ErrorBadRequest(w, errors.New(validationMessage(err)))
 	case errors.Is(err, errs.ErrNotFound):
 		s.reply.ErrorNotFound(w)
 	case errors.Is(err, errs.ErrAlreadyExists):
-		s.reply.ErrorConflict(w, err)
+		s.reply.ErrorConflict(w, errs.ErrAlreadyExists)
 	case errors.Is(err, errs.ErrInvalidCredentials):
-		s.reply.ErrorUnauthorized(w, err)
+		s.reply.ErrorUnauthorized(w, errs.ErrInvalidCredentials)
 	default:
 		s.reply.ErrorInternal(w, err)
 	}
+}
+
+// validationMessage drops the internal call chain ("ValidateCompany: ...") and keeps
+// only the part meant for the client, e.g. "validation failed: name is required".
+func validationMessage(err error) string {
+	msg := err.Error()
+	if i := strings.Index(msg, errs.ErrValidation.Error()); i >= 0 {
+		return msg[i:]
+	}
+
+	return errs.ErrValidation.Error()
 }
