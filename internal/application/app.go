@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/jackc/pgx/v5/stdlib" // go postgres driver
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
@@ -158,7 +159,15 @@ func (app *App) connectPostgres(ctx context.Context) (closeFunc, error) {
 func (app *App) createHTTPServer() {
 	router := chi.NewRouter()
 
-	httpResponder := rest.NewResponder()
+	router.Use(
+		middleware.RequestID,
+		rest.RequestLogger(app.logger),
+		middleware.Recoverer,
+	)
+
+	router.Get("/health", rest.HealthHandler(app.postgresClient))
+
+	httpResponder := rest.NewResponder(app.logger)
 
 	authService := service.NewAuthService(
 		persistence.NewUser(app.postgresClient),

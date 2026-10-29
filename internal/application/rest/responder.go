@@ -2,8 +2,9 @@ package rest
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type Responder interface {
@@ -23,10 +24,12 @@ type APIResponse struct {
 	Message string `json:"message"`
 }
 
-type Respond struct{}
+type Respond struct {
+	logger *zap.Logger
+}
 
-func NewResponder() Responder {
-	return &Respond{}
+func NewResponder(logger *zap.Logger) Responder {
+	return &Respond{logger: logger}
 }
 
 func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
@@ -41,15 +44,19 @@ func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
 
 	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
+// ErrorInternal logs the real error and returns a generic message:
+// internal details (SQL, hosts, stack of wrapped calls) must not reach the client.
 func (r *Respond) ErrorInternal(w http.ResponseWriter, err error) {
+	r.logger.Error("internal error", zap.Error(err))
+
 	APIResponse := APIResponse{
 		Code:    http.StatusInternalServerError,
 		Type:    "Internal error",
-		Message: err.Error(),
+		Message: "internal server error",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -57,7 +64,7 @@ func (r *Respond) ErrorInternal(w http.ResponseWriter, err error) {
 
 	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
@@ -73,7 +80,7 @@ func (r *Respond) ErrorNotFound(w http.ResponseWriter) {
 
 	err := json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
@@ -89,7 +96,7 @@ func (r *Respond) ErrorUnauthorized(w http.ResponseWriter, err error) {
 
 	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
@@ -105,7 +112,7 @@ func (r *Respond) ErrorConflict(w http.ResponseWriter, err error) {
 
 	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
@@ -115,7 +122,7 @@ func (r *Respond) OutputJSON(w http.ResponseWriter, responseData interface{}) {
 
 	err := json.NewEncoder(w).Encode(responseData)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
@@ -125,7 +132,7 @@ func (r *Respond) StatusCreated(w http.ResponseWriter, responseData interface{})
 
 	err := json.NewEncoder(w).Encode(responseData)
 	if err != nil {
-		log.Println("encode json error: ", err)
+		r.logger.Error("encode json response", zap.Error(err))
 	}
 }
 
