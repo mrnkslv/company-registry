@@ -8,6 +8,7 @@ package main
 
 import (
 	"company-registry/internal/application"
+	"fmt"
 	"os"
 )
 
@@ -15,7 +16,7 @@ var appVersion = "v0.0.0"
 
 func main() {
 	if err := application.New(appVersion).Run(); err != nil {
-		os.Stderr.WriteString(err.Error())
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
