@@ -12,3 +12,6 @@ goose-down:
 
 lint:
 	golangci-lint run
+
+test-integration:
+	go test -tags=integration -count=1 -timeout 5m ./internal/application/integration_test/...

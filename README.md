@@ -116,7 +116,7 @@ Get a token. A test user `testusername` is created by the migrations:
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/auth/v1/login \
   -H 'Content-Type: application/json' \
-  -d '{"username":"testusername","password":"<password>"}' | jq -r .token)
+  -d '{"username":"testusername","password":"<password1>"}' | jq -r .token)
 ```
 
 Create a company:
@@ -214,8 +214,11 @@ and REST handlers depend on service interfaces.
 
 ```bash
 make lint                          # golangci-lint
+make test-integration              # HTTP + Postgres via testcontainers; requires Docker
 make goose-create name=add_index   # new migration in ./migrations
 ```
+
+Integration tests start a disposable Postgres 17 container, apply goose migrations and hit the real chi router.
 
 Migrations are applied automatically when the service starts.
 
