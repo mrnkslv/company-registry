@@ -1,15 +1,15 @@
 package service
 
 import (
-	"company-registry/internal/domain/entity"
-	"company-registry/internal/domain/errs"
 	"context"
 	"fmt"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
 
+	"company-registry/internal/domain/entity"
 	"company-registry/internal/domain/enum"
+	"company-registry/internal/domain/errs"
 )
 
 type Service struct {
@@ -57,6 +57,7 @@ func (s *Service) GetCompany(ctx context.Context, id uuid.UUID) (*entity.Company
 func (s *Service) PatchCompany(ctx context.Context, id uuid.UUID, patch entity.CompanyPatch) (*entity.Company, error) {
 	company, err := s.companySource.UpdateCompany(ctx, id, func(c *entity.Company) error {
 		c.Apply(patch)
+
 		return s.ValidateCompany(c)
 	})
 	if err != nil {
@@ -78,17 +79,21 @@ func (s *Service) ValidateCompany(company *entity.Company) error {
 	if company.Name == "" {
 		return fmt.Errorf("%w: name is required", errs.ErrValidation)
 	}
+
 	if utf8.RuneCountInString(company.Name) > 15 {
 		return fmt.Errorf("%w: name must be at most 15 characters", errs.ErrValidation)
 	}
+
 	if company.Description != nil && utf8.RuneCountInString(*company.Description) > 3000 {
 		return fmt.Errorf("%w: description must be at most 3000 characters", errs.ErrValidation)
 	}
+
 	if company.AmountOfEmployees <= 0 {
 		return fmt.Errorf("%w: amount of employees must not be negative", errs.ErrValidation)
 	}
+
 	if _, err := enum.ParseCompanyType(company.Type); err != nil {
-		return fmt.Errorf("%w: invalid type: %v", errs.ErrValidation, err)
+		return fmt.Errorf("%w: invalid type: %w", errs.ErrValidation, err)
 	}
 
 	return nil

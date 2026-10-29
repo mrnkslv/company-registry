@@ -20,13 +20,14 @@ import (
 // @Failure      400  {object}  error
 // @Failure      404  {object}  error
 // @Failure      500  {object}  error
-// @Router       /company/v1/{id} [get]
+// @Router       /company/v1/{id} [get].
 func (s *Server) GetCompanyV1(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	companyID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		s.reply.ErrorBadRequest(w, fmt.Errorf("invalid company id: %w", err))
+
 		return
 	}
 

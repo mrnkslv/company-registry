@@ -7,9 +7,10 @@
 package main
 
 import (
-	"company-registry/internal/application"
 	"fmt"
 	"os"
+
+	"company-registry/internal/application"
 )
 
 var appVersion = "v0.0.0"

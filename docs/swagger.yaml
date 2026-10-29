@@ -53,7 +53,7 @@ definitions:
       type:
         type: string
     type: object
-  rest.ApiResponse:
+  rest.APIResponse:
     properties:
       code:
         type: integer
@@ -90,15 +90,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rest.ApiResponse'
+            $ref: '#/definitions/rest.APIResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/rest.ApiResponse'
+            $ref: '#/definitions/rest.APIResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rest.ApiResponse'
+            $ref: '#/definitions/rest.APIResponse'
       summary: Get access token
       tags:
       - Auth

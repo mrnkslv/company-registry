@@ -2,22 +2,20 @@ package application
 
 import (
 	"context"
-	"os"
-
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
-	"github.com/pressly/goose/v3"
-	"go.uber.org/zap/zapcore"
-
 	_ "github.com/jackc/pgx/v5/stdlib" // go postgres driver
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"golang.org/x/sync/errgroup"
 
 	"company-registry/internal/application/rest"
@@ -84,9 +82,7 @@ func (app *App) Run() error {
 		return fmt.Errorf("goose.Up: %w", err)
 	}
 
-	if err := app.createHTTPServer(); err != nil {
-		return fmt.Errorf("createHTTPServer: %w", err)
-	}
+	app.createHTTPServer()
 
 	g, ctx := errgroup.WithContext(ctx)
 
@@ -107,7 +103,6 @@ func (app *App) loadConfig() error {
 	}
 
 	app.cfg, err = config.Load()
-
 	if err != nil {
 		return fmt.Errorf("config.Load: %w", err)
 	}
@@ -125,7 +120,7 @@ func (app *App) createLogger() (closeFunc, error) {
 
 	return func() {
 		app.logger.Info("application stopped gracefully")
-		app.logger.Sync() //nolint:errcheck
+		app.logger.Sync() //nolint:errcheck, gosec
 	}, nil
 }
 
@@ -150,7 +145,7 @@ func (app *App) connectPostgres(ctx context.Context) (closeFunc, error) {
 	}, nil
 }
 
-func (app *App) createHTTPServer() error { //nolint:funlen
+func (app *App) createHTTPServer() {
 	router := chi.NewRouter()
 
 	httpResponder := rest.NewResponder()
@@ -183,8 +178,6 @@ func (app *App) createHTTPServer() error { //nolint:funlen
 		Handler:           router,
 		MaxHeaderBytes:    1 << 20,
 	}
-
-	return nil
 }
 
 func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
