@@ -155,8 +155,17 @@ func (app *App) createHTTPServer() error { //nolint:funlen
 
 	httpResponder := rest.NewResponder()
 
+	authService := service.NewAuthService(
+		persistence.NewUser(app.postgresClient),
+		app.cfg.Auth.Salt,
+		app.cfg.Auth.SigningKey,
+		app.cfg.Auth.TokenTTL,
+	)
+
 	restServer := rest.NewServer(
 		service.NewService(persistence.NewCompany(app.postgresClient)),
+		authService,
+		rest.NewAuthMiddleware(authService, httpResponder),
 		httpResponder,
 		app.cfg,
 	)

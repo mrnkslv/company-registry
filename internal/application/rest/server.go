@@ -25,19 +25,33 @@ type CompanyService interface {
 	DeleteCompany(ctx context.Context, id uuid.UUID) error
 }
 
+type AuthService interface {
+	GenerateToken(ctx context.Context, username, password string) (string, error)
+}
+
+type authMiddleware interface {
+	Authenticate(next http.Handler) http.Handler
+}
+
 type Server struct {
 	companyService CompanyService
+	authService    AuthService
+	authMiddleware authMiddleware
 	reply          reply
 	cfg            config.Config
 }
 
 func NewServer(
 	companyService CompanyService,
+	authService AuthService,
+	authMiddleware authMiddleware,
 	reply reply,
 	cfg config.Config,
 ) *Server {
 	return &Server{
 		companyService: companyService,
+		authService:    authService,
+		authMiddleware: authMiddleware,
 		reply:          reply,
 		cfg:            cfg,
 	}
@@ -61,11 +75,18 @@ func (s Server) RegisterRoutes(
 		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // или относительный /swagger/doc.json
 	))
 
+	r.Post("/auth/v1/login", s.LoginV1)
+
 	r.Route("/company/v1", func(r chi.Router) {
 		r.Get("/{id}", s.GetCompanyV1)
-		r.Post("/", s.CreateCompanyV1)
-		r.Patch("/{id}", s.PatchCompanyV1)
-		r.Delete("/{id}", s.DeleteCompanyV1)
+
+		r.Group(func(r chi.Router) {
+			r.Use(s.authMiddleware.Authenticate)
+
+			r.Post("/", s.CreateCompanyV1)
+			r.Patch("/{id}", s.PatchCompanyV1)
+			r.Delete("/{id}", s.DeleteCompanyV1)
+		})
 	})
 }
 
@@ -85,6 +106,8 @@ func (s *Server) replyError(w http.ResponseWriter, err error) {
 		s.reply.ErrorNotFound(w)
 	case errors.Is(err, errs.ErrAlreadyExists):
 		s.reply.ErrorConflict(w, err)
+	case errors.Is(err, errs.ErrInvalidCredentials):
+		s.reply.ErrorUnauthorized(w, err)
 	default:
 		s.reply.ErrorInternal(w, err)
 	}
