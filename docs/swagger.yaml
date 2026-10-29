@@ -1,0 +1,135 @@
+basePath: /
+definitions:
+  company-registry_internal_application_rest_dto.Company:
+    properties:
+      amount_of_employees:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      registered:
+        type: boolean
+      type:
+        type: string
+    type: object
+  company-registry_internal_application_rest_dto.CreateCompanyRequest:
+    properties:
+      amount_of_employees:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      registered:
+        type: boolean
+      type:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: CRUD companies
+  title: Company Registry API
+  version: "1.0"
+paths:
+  /company/v1:
+    post:
+      parameters:
+      - description: Company
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/company-registry_internal_application_rest_dto.CreateCompanyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Create new company
+      tags:
+      - Company
+  /company/v1/{id}:
+    delete:
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Delete company by ID
+      tags:
+      - Company
+    get:
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/company-registry_internal_application_rest_dto.Company'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Get company by ID
+      tags:
+      - Company
+    patch:
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Company
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/company-registry_internal_application_rest_dto.Company'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Patch company by ID
+      tags:
+      - Company
+schemes:
+- http
+swagger: "2.0"
