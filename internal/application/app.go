@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"os"
 
 	"errors"
 	"fmt"
@@ -101,7 +102,7 @@ func (app *App) Run() error {
 func (app *App) loadConfig() error {
 	var err error
 
-	if err = godotenv.Load(); err != nil {
+	if err = godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("godotenv.Load: %w", err)
 	}
 
