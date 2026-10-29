@@ -27,7 +27,7 @@ func NewService(
 type CompanySource interface {
 	GetCompany(ctx context.Context, id uuid.UUID) (*entity.Company, error)
 	CreateCompany(ctx context.Context, company *entity.Company) error
-	UpdateCompany(ctx context.Context, company *entity.Company) error
+	UpdateCompany(ctx context.Context, id uuid.UUID, update func(*entity.Company) error) (*entity.Company, error)
 	DeleteCompany(ctx context.Context, id uuid.UUID) error
 }
 
@@ -35,33 +35,31 @@ func (s *Service) CreateCompany(ctx context.Context, company *entity.Company) (u
 	company.ID = uuid.New()
 
 	if err := s.ValidateCompany(company); err != nil {
-		return uuid.UUID{}, fmt.Errorf("ValidateCompany: %w", err)
+		return uuid.Nil, fmt.Errorf("ValidateCompany: %w", err)
 	}
 
 	if err := s.companySource.CreateCompany(ctx, company); err != nil {
-		return uuid.UUID{}, fmt.Errorf("companySource.CreateCompany: %w", err)
+		return uuid.Nil, fmt.Errorf("companySource.CreateCompany: %w", err)
 	}
 
 	return company.ID, nil
 }
 
 func (s *Service) GetCompany(ctx context.Context, id uuid.UUID) (*entity.Company, error) {
-	return s.companySource.GetCompany(ctx, id)
-}
-
-func (s *Service) PatchCompany(ctx context.Context, id uuid.UUID, patch entity.CompanyPatch) (*entity.Company, error) {
 	company, err := s.companySource.GetCompany(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("companySource.GetCompany: %w", err)
 	}
 
-	company.Apply(patch)
+	return company, nil
+}
 
-	if err := s.ValidateCompany(company); err != nil {
-		return nil, err
-	}
-
-	if err := s.companySource.UpdateCompany(ctx, company); err != nil {
+func (s *Service) PatchCompany(ctx context.Context, id uuid.UUID, patch entity.CompanyPatch) (*entity.Company, error) {
+	company, err := s.companySource.UpdateCompany(ctx, id, func(c *entity.Company) error {
+		c.Apply(patch)
+		return s.ValidateCompany(c)
+	})
+	if err != nil {
 		return nil, fmt.Errorf("companySource.UpdateCompany: %w", err)
 	}
 
@@ -69,7 +67,11 @@ func (s *Service) PatchCompany(ctx context.Context, id uuid.UUID, patch entity.C
 }
 
 func (s *Service) DeleteCompany(ctx context.Context, id uuid.UUID) error {
-	return s.companySource.DeleteCompany(ctx, id)
+	if err := s.companySource.DeleteCompany(ctx, id); err != nil {
+		return fmt.Errorf("companySource.DeleteCompany: %w", err)
+	}
+
+	return nil
 }
 
 func (s *Service) ValidateCompany(company *entity.Company) error {
