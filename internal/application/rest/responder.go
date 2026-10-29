@@ -17,7 +17,7 @@ type Responder interface {
 	StatusDeleted(w http.ResponseWriter)
 }
 
-type ApiResponse struct {
+type APIResponse struct {
 	Code    int    `json:"code"`
 	Type    string `json:"type"`
 	Message string `json:"message"`
@@ -30,71 +30,80 @@ func NewResponder() Responder {
 }
 
 func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
-	ApiResponse := ApiResponse{
+	APIResponse := APIResponse{
 		Code:    http.StatusBadRequest,
 		Type:    "Bad request",
 		Message: err.Error(),
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(ApiResponse.Code)
-	err = json.NewEncoder(w).Encode(ApiResponse)
+	w.WriteHeader(APIResponse.Code)
+
+	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
 		log.Println("encode json error: ", err)
 	}
 }
 
 func (r *Respond) ErrorInternal(w http.ResponseWriter, err error) {
-	ApiResponse := ApiResponse{
+	APIResponse := APIResponse{
 		Code:    http.StatusInternalServerError,
 		Type:    "Internal error",
 		Message: err.Error(),
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(ApiResponse.Code)
-	err = json.NewEncoder(w).Encode(ApiResponse)
+	w.WriteHeader(APIResponse.Code)
+
+	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
 		log.Println("encode json error: ", err)
 	}
 }
 
 func (r *Respond) ErrorNotFound(w http.ResponseWriter) {
-	ApiResponse := ApiResponse{
+	APIResponse := APIResponse{
 		Code:    http.StatusNotFound,
 		Type:    "Not found",
 		Message: "Object not found",
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(ApiResponse.Code)
-	err := json.NewEncoder(w).Encode(ApiResponse)
+	w.WriteHeader(APIResponse.Code)
+
+	err := json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
 		log.Println("encode json error: ", err)
 	}
 }
 
 func (r *Respond) ErrorUnauthorized(w http.ResponseWriter, err error) {
-	ApiResponse := ApiResponse{
+	APIResponse := APIResponse{
 		Code:    http.StatusUnauthorized,
 		Type:    "Authorization required",
 		Message: err.Error(),
 	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(ApiResponse.Code)
-	err = json.NewEncoder(w).Encode(ApiResponse)
+	w.WriteHeader(APIResponse.Code)
+
+	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
 		log.Println("encode json error: ", err)
 	}
 }
 
 func (r *Respond) ErrorConflict(w http.ResponseWriter, err error) {
-	ApiResponse := ApiResponse{
+	APIResponse := APIResponse{
 		Code:    http.StatusConflict,
 		Type:    "Conflict",
 		Message: err.Error(),
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(ApiResponse.Code)
 
-	err = json.NewEncoder(w).Encode(ApiResponse)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(APIResponse.Code)
+
+	err = json.NewEncoder(w).Encode(APIResponse)
 	if err != nil {
 		log.Println("encode json error: ", err)
 	}

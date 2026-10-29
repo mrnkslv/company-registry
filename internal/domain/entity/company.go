@@ -23,15 +23,19 @@ func (c *Company) Apply(p CompanyPatch) {
 	if p.Name != nil {
 		c.Name = *p.Name
 	}
+
 	if p.Description != nil {
 		c.Description = p.Description
 	}
+
 	if p.Type != nil {
 		c.Type = *p.Type
 	}
+
 	if p.AmountOfEmployees != nil {
 		c.AmountOfEmployees = *p.AmountOfEmployees
 	}
+
 	if p.Registered != nil {
 		c.Registered = *p.Registered
 	}

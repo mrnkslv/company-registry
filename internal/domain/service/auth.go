@@ -1,8 +1,6 @@
 package service
 
 import (
-	"company-registry/internal/domain/entity"
-	"company-registry/internal/domain/errs"
 	"context"
 	"crypto/sha1" //nolint:gosec
 	"errors"
@@ -10,6 +8,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
+	"company-registry/internal/domain/entity"
+	"company-registry/internal/domain/errs"
 )
 
 type UserSource interface {

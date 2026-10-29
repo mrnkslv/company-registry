@@ -16,13 +16,14 @@ import (
 // @Success      204  {object}  nil
 // @Failure      400  {object}  error
 // @Failure      500  {object}  error
-// @Router       /company/v1/{id} [delete]
+// @Router       /company/v1/{id} [delete].
 func (s *Server) DeleteCompanyV1(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	companyID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		s.reply.ErrorBadRequest(w, fmt.Errorf("invalid company id: %w", err))
+
 		return
 	}
 

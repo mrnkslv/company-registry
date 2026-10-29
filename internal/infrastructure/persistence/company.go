@@ -1,14 +1,16 @@
+//nolint:errcheck, gosec
 package persistence
 
 import (
-	"company-registry/internal/domain/entity"
-	"company-registry/internal/domain/errs"
 	"context"
 	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+
+	"company-registry/internal/domain/entity"
+	"company-registry/internal/domain/errs"
 )
 
 type Company struct {
@@ -58,9 +60,10 @@ func (c Company) UpdateCompany(
 	if err != nil {
 		return nil, fmt.Errorf("db.BeginTxx: %w", err)
 	}
-	defer func() { _ = tx.Rollback() }()
+	defer func() { tx.Rollback() }()
 
 	var company entity.Company
+
 	const selectQuery = `
 		SELECT id, name, description, type, amount_of_employees, registered
 		FROM companies
@@ -111,6 +114,7 @@ func checkAffected(res sql.Result) error {
 	if err != nil {
 		return fmt.Errorf("RowsAffected: %w", err)
 	}
+
 	if n == 0 {
 		return errs.ErrNotFound
 	}

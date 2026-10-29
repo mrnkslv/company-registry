@@ -48,19 +48,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rest.ApiResponse"
+                            "$ref": "#/definitions/rest.APIResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/rest.ApiResponse"
+                            "$ref": "#/definitions/rest.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rest.ApiResponse"
+                            "$ref": "#/definitions/rest.APIResponse"
                         }
                     }
                 }
@@ -316,7 +316,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rest.ApiResponse": {
+        "rest.APIResponse": {
             "type": "object",
             "properties": {
                 "code": {

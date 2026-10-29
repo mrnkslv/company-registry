@@ -1,11 +1,11 @@
 package rest
 
 import (
-	"company-registry/internal/domain/entity"
 	"fmt"
 	"net/http"
 
 	"company-registry/internal/application/rest/dto"
+	"company-registry/internal/domain/entity"
 )
 
 // CreateCompanyV1 godoc
@@ -17,13 +17,14 @@ import (
 // @Success      201  {object}  dto.Company
 // @Failure      400  {object}  error
 // @Failure      500  {object}  error
-// @Router       /company/v1 [post]
+// @Router       /company/v1 [post].
 func (s *Server) CreateCompanyV1(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var request dto.CreateCompanyRequest
 	if err := s.readRequest(r, &request); err != nil {
 		s.reply.ErrorBadRequest(w, fmt.Errorf("readRequest: %w", err))
+
 		return
 	}
 
@@ -38,6 +39,7 @@ func (s *Server) CreateCompanyV1(w http.ResponseWriter, r *http.Request) {
 	companyID, err := s.companyService.CreateCompany(ctx, &company)
 	if err != nil {
 		s.replyError(w, err)
+
 		return
 	}
 

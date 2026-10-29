@@ -1,21 +1,20 @@
 package rest
 
 import (
-	_ "company-registry/docs"
-	"company-registry/internal/config"
-	"company-registry/internal/domain/entity"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
-	"company-registry/internal/domain/errs"
-
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 
-	"github.com/go-chi/chi/v5"
+	_ "company-registry/docs"
+	"company-registry/internal/config"
+	"company-registry/internal/domain/entity"
+	"company-registry/internal/domain/errs"
 )
 
 type CompanyService interface {
@@ -72,7 +71,7 @@ func (s Server) RegisterRoutes(
 	r chi.Router,
 ) {
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // или относительный /swagger/doc.json
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"), // or relative /swagger/doc.json
 	))
 
 	r.Post("/auth/v1/login", s.LoginV1)

@@ -1,15 +1,14 @@
 package rest
 
 import (
-	"company-registry/internal/domain/entity"
 	"fmt"
-
 	"net/http"
-
-	"company-registry/internal/application/rest/dto"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+
+	"company-registry/internal/application/rest/dto"
+	"company-registry/internal/domain/entity"
 )
 
 // PatchCompanyV1 godoc
@@ -24,19 +23,21 @@ import (
 // @Failure      500  {object}  error
 // @Param        id       path  string                    true  "Company ID"
 // @Param        company  body  dto.PatchCompanyRequest   true  "Fields to update"
-// @Router       /company/v1/{id} [patch]
+// @Router       /company/v1/{id} [patch].
 func (s *Server) PatchCompanyV1(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		s.reply.ErrorBadRequest(w, fmt.Errorf("invalid company id: %w", err))
+
 		return
 	}
 
 	var request dto.PatchCompanyRequest
 	if err := s.readRequest(r, &request); err != nil {
 		s.reply.ErrorBadRequest(w, fmt.Errorf("readRequest: %w", err))
+
 		return
 	}
 
@@ -49,6 +50,7 @@ func (s *Server) PatchCompanyV1(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		s.replyError(w, err)
+
 		return
 	}
 

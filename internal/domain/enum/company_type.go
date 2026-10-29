@@ -22,7 +22,6 @@ func (c CompanyType) Value() (driver.Value, error) {
 	return c.String(), nil
 }
 
-//nolint:cyclop
 func ParseCompanyType(a any) (CompanyType, error) {
 	s := fmt.Sprintf("%v", a)
 

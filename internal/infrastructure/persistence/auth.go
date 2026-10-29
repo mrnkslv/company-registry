@@ -1,11 +1,12 @@
 package persistence
 
 import (
-	"company-registry/internal/domain/entity"
 	"context"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+
+	"company-registry/internal/domain/entity"
 )
 
 type User struct {

@@ -39,18 +39,21 @@ func (m *AuthMiddleware) Authenticate(next http.Handler) http.Handler {
 		header := r.Header.Get(authorizationHeader)
 		if header == "" {
 			m.reply.ErrorUnauthorized(w, errors.New("empty auth header"))
+
 			return
 		}
 
 		token, ok := strings.CutPrefix(header, bearerPrefix)
 		if !ok || token == "" {
 			m.reply.ErrorUnauthorized(w, errors.New("invalid auth header"))
+
 			return
 		}
 
 		userID, err := m.tokenParser.ParseToken(token)
 		if err != nil {
 			m.reply.ErrorUnauthorized(w, fmt.Errorf("invalid token: %w", err))
+
 			return
 		}
 
