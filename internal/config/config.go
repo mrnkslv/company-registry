@@ -35,6 +35,16 @@ type Config struct {
 		MigrateUp         bool   `env:"GOOSE_MIGRATION_UP" envDefault:"true"`
 	}
 
+	Kafka struct {
+		Brokers []string `env:"KAFKA_BROKERS,notEmpty" envSeparator:","`
+		Topic   string   `env:"KAFKA_TOPIC" envDefault:"company-events"`
+	}
+
+	Outbox struct {
+		PollInterval time.Duration `env:"OUTBOX_POLL_INTERVAL" envDefault:"1s"`
+		BatchSize    int           `env:"OUTBOX_BATCH_SIZE" envDefault:"100"`
+	}
+
 	Debug bool `env:"DEBUG" envDefault:"false"`
 }
 
