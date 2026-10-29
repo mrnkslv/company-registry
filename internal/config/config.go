@@ -31,7 +31,7 @@ type Config struct {
 
 	Goose struct {
 		GooseDriver       string `env:"GOOSE_DRIVER" envDefault:"postgres"`
-		GooseMigrationDir string `env:"GOOSE_MIGRATION_DIR" envDefault:"./"`
+		GooseMigrationDir string `env:"GOOSE_MIGRATION_DIR" envDefault:"."`
 		MigrateUp         bool   `env:"GOOSE_MIGRATION_UP" envDefault:"true"`
 	}
 
