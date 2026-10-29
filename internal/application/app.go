@@ -21,6 +21,8 @@ import (
 	"company-registry/internal/application/rest"
 	"company-registry/internal/config"
 	"company-registry/internal/domain/service"
+	"company-registry/internal/infrastructure/kafka"
+	"company-registry/internal/infrastructure/outbox"
 	"company-registry/internal/infrastructure/persistence"
 	"company-registry/migrations"
 )
@@ -84,9 +86,17 @@ func (app *App) Run() error {
 
 	app.createHTTPServer()
 
+	kafkaPublisher := kafka.NewPublisher(app.cfg.Kafka.Brokers, app.cfg.Kafka.Topic)
+	defer func() {
+		if err := kafkaPublisher.Close(); err != nil {
+			app.logger.Error("kafkaPublisher.Close", zap.Error(err))
+		}
+	}()
+
 	g, ctx := errgroup.WithContext(ctx)
 
 	app.runHTTPServer(ctx, g)
+	app.runOutboxRelay(ctx, g, kafkaPublisher)
 
 	if err := g.Wait(); err != nil {
 		return fmt.Errorf("g.Wait: %w", err)
@@ -200,6 +210,28 @@ func (app *App) runHTTPServer(ctx context.Context, g *errgroup.Group) {
 		}
 
 		app.logger.Info("http server stopped")
+
+		return nil
+	})
+}
+
+func (app *App) runOutboxRelay(ctx context.Context, g *errgroup.Group, publisher outbox.Publisher) {
+	relay := outbox.NewRelay(
+		app.postgresClient,
+		publisher,
+		app.cfg.Outbox.BatchSize,
+		app.cfg.Outbox.PollInterval,
+		app.logger,
+	)
+
+	g.Go(func() error {
+		app.logger.Info("outbox relay started", zap.String("topic", app.cfg.Kafka.Topic))
+
+		if err := relay.Run(ctx); err != nil {
+			return fmt.Errorf("relay.Run: %w", err)
+		}
+
+		app.logger.Info("outbox relay stopped")
 
 		return nil
 	})

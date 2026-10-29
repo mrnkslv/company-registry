@@ -2,7 +2,7 @@
 
 A Go microservice for managing companies. Reading is public; create, update and delete require a JWT.
 
-**Stack:** Go, chi, PostgreSQL (sqlx + pgx), goose migrations, JWT, zap, Swagger, Docker.
+**Stack:** Go, chi, PostgreSQL (sqlx + pgx), Kafka, goose migrations, JWT, zap, Swagger, Docker.
 
 ## Run
 
@@ -19,7 +19,7 @@ Migrations are applied automatically on startup.
 To run the service locally with Go 1.27+, start only the database and run the app:
 
 ```bash
-docker compose up -d db
+docker compose up -d db kafka
 go run ./cmd
 ```
 
@@ -57,6 +57,32 @@ curl -X DELETE localhost:8080/company/v1/<id> -H "Authorization: Bearer $TOKEN"
 Errors are returned as `{"code": 404, "type": "Not found", "message": "..."}` with status `400`, `401`, `404`, `409`
 or `500`.
 
+## Events
+
+Every successful create, update and delete publishes an event to the Kafka topic `company-events`:
+
+```json
+{
+  "id": "6f1c…",
+  "type": "company.updated",
+  "occurred_at": "2026-10-29T09:00:00Z",
+  "company": {"id": "…", "name": "Acme", "type": "Corporations", "amount_of_employees": 25, "registered": false}
+}
+```
+
+- Types: `company.created`, `company.updated`, `company.deleted` (the last one carries the deleted state).
+- The message key is the company id, so events of one company keep their order.
+- Events are sent through a **transactional outbox**: the change and its event are written in the same database
+  transaction, and a background relay publishes pending events to Kafka. An event is never lost if Kafka is down and
+  never sent for a change that was rolled back. Delivery is at-least-once; consumers should deduplicate by `id`.
+
+To watch events:
+
+```bash
+docker compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic company-events --from-beginning
+```
+
 ## Configuration
 
 Settings come from environment variables; a `.env` file is loaded if present.
@@ -72,6 +98,10 @@ added to `.gitignore`.
 | `AUTH_SALT` | required |
 | `AUTH_SIGNING_KEY` | required |
 | `AUTH_TOKEN_TTL` | `12h` |
+| `KAFKA_BROKERS` | required, comma-separated |
+| `KAFKA_TOPIC` | `company-events` |
+| `OUTBOX_POLL_INTERVAL` | `1s` |
+| `OUTBOX_BATCH_SIZE` | `100` |
 | `DEBUG` | `false` |
 
 HTTP timeouts and Postgres pool sizes are also configurable, see `internal/config/config.go`.
