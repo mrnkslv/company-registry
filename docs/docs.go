@@ -15,8 +15,62 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/v1/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get access token",
+                "parameters": [
+                    {
+                        "description": "Credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.ApiResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/rest.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/company/v1": {
             "post": {
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -36,8 +90,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.Company"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -79,6 +136,10 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {}
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {}
@@ -103,8 +164,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -117,6 +178,9 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -133,21 +197,32 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Company",
+                        "description": "Fields to update",
                         "name": "company",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.Company"
+                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.PatchCompanyRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/company-registry_internal_application_rest_dto.Company"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {}
                     },
                     "500": {
@@ -196,6 +271,59 @@ const docTemplate = `{
                 },
                 "registered": {
                     "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "company-registry_internal_application_rest_dto.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "company-registry_internal_application_rest_dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "company-registry_internal_application_rest_dto.PatchCompanyRequest": {
+            "type": "object",
+            "properties": {
+                "amount_of_employees": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "registered": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "rest.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"

@@ -7,6 +7,8 @@ services:
     environment:
       HTTP_LISTEN_ADDRESS: ":8080"
       PG_DSN_COMPANY_REGISTRY: "postgres://postgres:qwerty@db:5432/company_registry?sslmode=disable"
+      AUTH_SALT: "jfghdlkoviojkfdko"
+      AUTH_SIGNING_KEY: "fhvjiokig98y##6785409396"
     depends_on:
       db:
         condition: service_healthy

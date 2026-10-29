@@ -23,6 +23,12 @@ type Config struct {
 		ConnMaxLifetime time.Duration `env:"PG_CONN_MAX_LIFETIME" envDefault:"5m"`
 	}
 
+	Auth struct {
+		Salt       string        `env:"AUTH_SALT,notEmpty" json:"-"`
+		SigningKey string        `env:"AUTH_SIGNING_KEY,notEmpty" json:"-"`
+		TokenTTL   time.Duration `env:"AUTH_TOKEN_TTL" envDefault:"12h"`
+	}
+
 	Goose struct {
 		GooseDriver       string `env:"GOOSE_DRIVER" envDefault:"postgres"`
 		GooseMigrationDir string `env:"GOOSE_MIGRATION_DIR" envDefault:"./"`

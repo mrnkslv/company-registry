@@ -28,6 +28,40 @@ definitions:
       type:
         type: string
     type: object
+  company-registry_internal_application_rest_dto.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  company-registry_internal_application_rest_dto.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  company-registry_internal_application_rest_dto.PatchCompanyRequest:
+    properties:
+      amount_of_employees:
+        type: integer
+      description:
+        type: string
+      name:
+        type: string
+      registered:
+        type: boolean
+      type:
+        type: string
+    type: object
+  rest.ApiResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      type:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -35,8 +69,43 @@ info:
   title: Company Registry API
   version: "1.0"
 paths:
+  /auth/v1/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/company-registry_internal_application_rest_dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/company-registry_internal_application_rest_dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest.ApiResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest.ApiResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.ApiResponse'
+      summary: Get access token
+      tags:
+      - Auth
   /company/v1:
     post:
+      consumes:
+      - application/json
       parameters:
       - description: Company
         in: body
@@ -47,8 +116,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/company-registry_internal_application_rest_dto.Company'
         "400":
           description: Bad Request
           schema: {}
@@ -69,8 +140,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "204":
+          description: No Content
         "400":
           description: Bad Request
           schema: {}
@@ -97,6 +168,9 @@ paths:
         "400":
           description: Bad Request
           schema: {}
+        "404":
+          description: Not Found
+          schema: {}
         "500":
           description: Internal Server Error
           schema: {}
@@ -104,25 +178,35 @@ paths:
       tags:
       - Company
     patch:
+      consumes:
+      - application/json
       parameters:
       - description: Company ID
         in: path
         name: id
         required: true
         type: string
-      - description: Company
+      - description: Fields to update
         in: body
         name: company
         required: true
         schema:
-          $ref: '#/definitions/company-registry_internal_application_rest_dto.Company'
+          $ref: '#/definitions/company-registry_internal_application_rest_dto.PatchCompanyRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/company-registry_internal_application_rest_dto.Company'
         "400":
           description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "409":
+          description: Conflict
           schema: {}
         "500":
           description: Internal Server Error
